@@ -90,7 +90,7 @@ def recvData(sock):
 # header should be a list of string
 def waitForMessage(sock, header):
 	head = None
-	while head not in header:
+	while head != header:
 		head, data = recvData(sock)
 	return stringToData(head, data)
 
