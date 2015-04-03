@@ -23,16 +23,15 @@ WHITE, BLACK = True, False # players
 
 
 class BoardPlayer(Board):
-	def __init__(self, sprite_pieces, sprite_board, sniper):
+	def __init__(self, sprite_pieces, sprite_board):
 		super(BoardPlayer, self).__init__()
 		self.sprite_pieces = sprite_pieces
 		self.sprite_board = sprite_board
-		self.sniper = sniper
 		self.visibility = None
 
 	def copy(self):
 		board = super(BoardPlayer, self).copy()
-		res = BoardPlayer(self.sprite_pieces, self.sprite_board, self.sniper)
+		res = BoardPlayer(self.sprite_pieces, self.sprite_board)
 		res.updateFromBoard(board)
 		return res
 
@@ -126,8 +125,7 @@ def loadData():
 	sprite_pieces = pygame.image.load('data/pieces.png')
 	#sprite_pieces.set_colorkey((255,0,255)) # for non-transparent png, chroma-keying
 	sprite_pieces = sprite_pieces.convert_alpha(sprite_pieces)
-	sniper = pygame.mixer.Sound('data/sniper.wav')
-	return [sprite_board, sprite_pieces, sniper]
+	return [sprite_board, sprite_pieces]
 
 
 # get keyboard to work 
@@ -389,9 +387,9 @@ def introGameState(screen, board, connectionThread = None) :
 
 
 # regular two player game over network
-def networkGame(argv, screen, sprite_board, sprite_pieces, sniper):
+def networkGame(argv, screen, sprite_board, sprite_pieces):
 
-	board = BoardPlayer(sprite_pieces, sprite_board, sniper)
+	board = BoardPlayer(sprite_pieces, sprite_board)
 
 	PORT = 8887
 	HOST = "sxbn.org"  
@@ -442,16 +440,16 @@ def networkGame(argv, screen, sprite_board, sprite_pieces, sniper):
 		pass
 
 	if whatNext == 'r' :
-		replay(url, screen, sprite_board, sprite_pieces, sniper)
+		replay(url, screen, sprite_board, sprite_pieces)
 	elif whatNext == 'g':
-		networkGame(argv, screen, sprite_board, sprite_pieces, sniper)
+		networkGame(argv, screen, sprite_board, sprite_pieces)
 
 
 
 
 
 
-def replay(url, screen, sprite_board, sprite_pieces, sniper):
+def replay(url, screen, sprite_board, sprite_pieces):
 	
 	fic = urllib.urlopen(url)
 	matchup = fic.readline()
@@ -459,7 +457,7 @@ def replay(url, screen, sprite_board, sprite_pieces, sniper):
 
 	# load moves
 	moves = [[int(c) for c in l.split()] for l in fic]
-	boards = [BoardPlayer(sprite_pieces, sprite_board, sniper)]
+	boards = [BoardPlayer(sprite_pieces, sprite_board)]
 	for m in moves :
 		boards.append(boards[-1].copy())
 		boards[-1].move(*m)
@@ -517,7 +515,7 @@ if __name__ == '__main__':
 	pygame.init()
 	pygame.mixer.init()
 	screen = pygame.display.set_mode((W,H))
-	sprite_board, sprite_pieces, sniper = loadData()
+	sprite_board, sprite_pieces = loadData()
 	
 
 	if len(sys.argv) > 2 :
@@ -525,12 +523,12 @@ if __name__ == '__main__':
 			if len(sys.argv) < 3 :
 				print "missing replay file"
 				sys.exit()
-			replay(sys.argv[2], screen, sprite_board, sprite_pieces, sniper)
+			replay(sys.argv[2], screen, sprite_board, sprite_pieces)
 			pygame.quit()
 			sys.exit()
 
 
-	networkGame(sys.argv, screen, sprite_board, sprite_pieces, sniper)
+	networkGame(sys.argv, screen, sprite_board, sprite_pieces)
 	pygame.quit()
 	sys.exit()
 	
